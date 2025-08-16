@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Data;
+using WebApi.DTOs.Stock;
 using WebApi.Mappers;
 
 namespace WebApi.Controllers
@@ -33,5 +34,34 @@ namespace WebApi.Controllers
             return Ok(stock.ToStockDto());
         }
 
+        [HttpPost]
+        public IActionResult Create([FromBody] CreateStockRequestDto stockDto)
+        {
+            var stockModel = stockDto.ToStockFromCreateDto();
+            _context.Stocks.Add(stockModel);
+            _context.SaveChanges();
+
+            return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
+        {
+            var stockModel = _context.Stocks.Find(id);
+
+            if (stockModel == null)
+                return NotFound();
+
+            stockModel.Symbol = updateDto.Symbol;
+            stockModel.CompanyName = updateDto.CompanyName;
+            stockModel.Purchase = updateDto.Purchase;
+            stockModel.LastDiv = updateDto.LastDiv;
+            stockModel.Industry = updateDto.Industry;
+            stockModel.MarketCap = updateDto.MarketCap;
+
+            _context.SaveChanges();
+
+            return Ok(stockModel.ToStockDto());
+        }
     }
 }
