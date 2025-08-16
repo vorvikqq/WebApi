@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Data;
+using WebApi.Mappers;
 
 namespace WebApi.Controllers
 {
@@ -16,7 +17,7 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var stocks = _context.Stocks.ToList();
+            var stocks = _context.Stocks.Select(s => s.ToStockDto());
 
             return Ok(stocks);
         }
@@ -29,7 +30,7 @@ namespace WebApi.Controllers
             if (stock == null)
                 return NotFound();
 
-            return Ok(stock);
+            return Ok(stock.ToStockDto());
         }
 
     }
