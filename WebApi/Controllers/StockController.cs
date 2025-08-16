@@ -63,5 +63,19 @@ namespace WebApi.Controllers
 
             return Ok(stockModel.ToStockDto());
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var stockModel = _context.Stocks.Find(id);
+
+            if (stockModel == null)
+                return NotFound();
+
+            _context.Stocks.Remove(stockModel);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
