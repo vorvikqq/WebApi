@@ -3,11 +3,16 @@ using WebApi.Models;
 
 namespace WebApi.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(IConfiguration configuration) : DbContext
     {
-        public ApplicationDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions) { }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<Comment> Comments { get; set; }
+
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+        }
 
     }
 }
