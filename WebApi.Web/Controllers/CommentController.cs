@@ -21,6 +21,7 @@ namespace WebApi.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+
             var comments = await _commentRepository.GetAllAsync();
 
             var commentsResponse = comments.Select(c => c.ToCommentResponse());
@@ -28,7 +29,7 @@ namespace WebApi.Web.Controllers
             return Ok(commentsResponse);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var comment = await _commentRepository.GetByIdAsync(id);
@@ -39,9 +40,12 @@ namespace WebApi.Web.Controllers
             return Ok(comment.ToCommentResponse());
         }
 
-        [HttpPost("{stockId}")]
+        [HttpPost("{stockId:int}")]
         public async Task<IActionResult> Create([FromRoute] int stockId, [FromBody] CommentCreateRequest commentDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             if (!await _stockRepository.IsExistAsnyc(stockId))
                 return BadRequest("stock does not exist");
 
@@ -51,9 +55,12 @@ namespace WebApi.Web.Controllers
             return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentResponse());
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CommentUpdateRequest commentDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var updatedCount = await _commentRepository.UpdateAsync(id, commentDto);
 
             if (updatedCount == 0)
@@ -62,7 +69,7 @@ namespace WebApi.Web.Controllers
             return Ok(commentDto);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var deletedCount = await _commentRepository.DeleteAsync(id);

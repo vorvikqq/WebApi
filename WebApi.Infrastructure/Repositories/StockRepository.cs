@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApi.Application.DTOs.Stock;
+using WebApi.Application.Queries;
 using WebApi.Application.Repositories.Interfaces;
 using WebApi.Domain.Models;
 using WebApi.Infastructure.Data;
@@ -13,12 +14,18 @@ namespace WebApi.Infastructure.Repositories
         {
             _context = context;
         }
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
-            return await _context.Stocks
-                .Include(s => s.Comments)
-                .AsNoTracking()
-                .ToListAsync();
+            var stocks = _context.Stocks.Include(s => s.Comments).AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(query.CompanyName))
+                stocks = stocks.Where(s => s.CompanyName.Contains(query.CompanyName));
+
+            if (!string.IsNullOrWhiteSpace(query.Symbol))
+                stocks = stocks.Where(s => s.Symbol.Contains(query.Symbol));
+
+            return await stocks.ToListAsync();
+
         }
 
         public async Task<Stock?> GetByIdAsync(int id)

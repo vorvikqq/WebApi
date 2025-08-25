@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.DTOs.Stock;
 using WebApi.Application.Mappers;
+using WebApi.Application.Queries;
 using WebApi.Application.Repositories.Interfaces;
 
 namespace WebApi.Controllers
@@ -16,16 +17,16 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var stocks = await _stockRepo.GetAllAsync();
+            var stocks = await _stockRepo.GetAllAsync(query);
 
             var stockDtos = stocks.Select(s => s.ToStockDto());
 
             return Ok(stockDtos);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var stock = await _stockRepo.GetByIdAsync(id);
@@ -39,6 +40,9 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stockModel = stockDto.ToStockFromCreateDto();
 
             await _stockRepo.CreateAsync(stockModel);
@@ -46,9 +50,11 @@ namespace WebApi.Controllers
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var updatedCount = await _stockRepo.UpdateAsync(id, updateDto);
 
@@ -60,7 +66,7 @@ namespace WebApi.Controllers
             return Ok(stockModel.ToStockDto());
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
 
