@@ -15,12 +15,18 @@ namespace WebApi.Infastructure.Repositories
         }
         public async Task<List<Stock>> GetAllAsync()
         {
-            return await _context.Stocks.ToListAsync();
+            return await _context.Stocks
+                .Include(s => s.Comments)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
         {
-            return await _context.Stocks.FindAsync(id);
+            return await _context.Stocks
+                .Include(s => s.Comments)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public async Task<Stock> CreateAsync(Stock stock)
@@ -50,6 +56,11 @@ namespace WebApi.Infastructure.Repositories
                     .SetProperty(s => s.Industry, stockDto.Industry)
                     .SetProperty(s => s.MarketCap, stockDto.MarketCap)
                     );
+        }
+
+        public async Task<bool> IsExistAsnyc(int id)
+        {
+            return await _context.Stocks.AnyAsync(c => c.Id == id);
         }
     }
 }

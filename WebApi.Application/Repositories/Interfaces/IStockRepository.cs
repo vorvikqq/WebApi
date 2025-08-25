@@ -10,5 +10,6 @@ namespace WebApi.Application.Repositories.Interfaces
         Task<int> DeleteAsync(int id);
         Task<int> UpdateAsync(int id, UpdateStockRequestDto stockDto);
         Task<Stock> CreateAsync(Stock stock);
+        Task<bool> IsExistAsnyc(int id);
     }
 }

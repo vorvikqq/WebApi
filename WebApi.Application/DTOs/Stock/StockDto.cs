@@ -1,4 +1,6 @@
-﻿namespace WebApi.Application.DTOs.Stock
+﻿using WebApi.Application.DTOs.Comment;
+
+namespace WebApi.Application.DTOs.Stock
 {
     public class StockDto
     {
@@ -9,5 +11,7 @@
         public decimal LastDiv { get; set; }
         public string Industry { get; set; } = string.Empty;
         public long MarketCap { get; set; }
+        public List<CommentResponseDto> Comments { get; set; } = new List<CommentResponseDto>();
+
     }
 }
