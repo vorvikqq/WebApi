@@ -50,5 +50,29 @@ namespace WebApi.Web.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentResponse());
         }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CommentUpdateRequest commentDto)
+        {
+            var updatedCount = await _commentRepository.UpdateAsync(id, commentDto);
+
+            if (updatedCount == 0)
+                return NotFound();
+
+            return Ok(commentDto);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            var deletedCount = await _commentRepository.DeleteAsync(id);
+
+            if (deletedCount == 0)
+                return NotFound();
+
+            return NoContent();
+        }
+
+
     }
 }
