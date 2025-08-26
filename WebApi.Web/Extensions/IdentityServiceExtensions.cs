@@ -12,6 +12,8 @@ namespace WebApi.Web.Identity
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>();
 

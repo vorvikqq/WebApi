@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.DTOs.Comment;
 using WebApi.Application.Mappers;
-using WebApi.Application.Repositories.Interfaces;
+using WebApi.Application.Services.Interfaces;
 
 namespace WebApi.Web.Controllers
 {
@@ -9,22 +9,17 @@ namespace WebApi.Web.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly ICommentRepository _commentRepository;
-        private readonly IStockRepository _stockRepository;
+        private readonly ICommentService _commentService;
 
-        public CommentController(ICommentRepository commentRepository, IStockRepository stockRepository)
+        public CommentController(ICommentService commentService)
         {
-            _commentRepository = commentRepository;
-            _stockRepository = stockRepository;
+            _commentService = commentService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-
-            var comments = await _commentRepository.GetAllAsync();
-
-            var commentsResponse = comments.Select(c => c.ToCommentResponse());
+            var commentsResponse = await _commentService.GetAllCommentsAsync();
 
             return Ok(commentsResponse);
         }
@@ -32,12 +27,17 @@ namespace WebApi.Web.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var comment = await _commentRepository.GetByIdAsync(id);
+            CommentResponseDto comment;
+            try
+            {
+                comment = await _commentService.GetCommentByIdAsync(id);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
 
-            if (comment == null)
-                return NotFound();
-
-            return Ok(comment.ToCommentResponse());
+            return Ok(comment);
         }
 
         [HttpPost("{stockId:int}")]
@@ -46,11 +46,7 @@ namespace WebApi.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!await _stockRepository.IsExistAsnyc(stockId))
-                return BadRequest("stock does not exist");
-
-            var commentModel = commentDto.ToCommentFromCreateRequest(stockId);
-            await _commentRepository.CreateAsync(commentModel);
+            var commentModel = await _commentService.CreateCommentAsync(stockId, commentDto);
 
             return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentResponse());
         }
@@ -61,10 +57,14 @@ namespace WebApi.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedCount = await _commentRepository.UpdateAsync(id, commentDto);
-
-            if (updatedCount == 0)
-                return NotFound();
+            try
+            {
+                await _commentService.UpdateCommentAsync(id, commentDto);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
             return Ok(commentDto);
         }
@@ -72,14 +72,16 @@ namespace WebApi.Web.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var deletedCount = await _commentRepository.DeleteAsync(id);
-
-            if (deletedCount == 0)
-                return NotFound();
+            try
+            {
+                await _commentService.DeleteCommentAsync(id);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
             return NoContent();
         }
-
-
     }
 }

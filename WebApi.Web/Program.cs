@@ -1,4 +1,6 @@
 using WebApi.Application.Repositories.Interfaces;
+using WebApi.Application.Services;
+using WebApi.Application.Services.Interfaces;
 using WebApi.Infastructure.Data;
 using WebApi.Infastructure.Repositories;
 using WebApi.Web.Extensions;
@@ -16,7 +18,7 @@ builder.Services.AddCustomAuthentication(builder.Configuration);
 // Add services to the container.
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 
 builder.Services.AddEndpointsApiExplorer();

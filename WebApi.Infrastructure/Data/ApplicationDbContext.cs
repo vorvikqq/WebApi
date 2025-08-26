@@ -19,6 +19,7 @@ namespace WebApi.Infastructure.Data
 
             modelBuilder.ApplyConfiguration(new CommentConfiguration());
             modelBuilder.ApplyConfiguration(new StockConfiguration());
+            modelBuilder.ApplyConfiguration(new IdentityRoleConfiguration());
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
