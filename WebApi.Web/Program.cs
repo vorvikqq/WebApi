@@ -19,6 +19,7 @@ builder.Services.AddCustomAuthentication(builder.Configuration);
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IStockService, StockService>();
 
 
 builder.Services.AddEndpointsApiExplorer();

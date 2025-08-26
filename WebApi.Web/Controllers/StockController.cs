@@ -2,7 +2,7 @@
 using WebApi.Application.DTOs.Stock;
 using WebApi.Application.Mappers;
 using WebApi.Application.Queries;
-using WebApi.Application.Repositories.Interfaces;
+using WebApi.Application.Services.Interfaces;
 
 namespace WebApi.Controllers
 {
@@ -10,18 +10,16 @@ namespace WebApi.Controllers
     [Route("api/stock")]
     public class StockController : ControllerBase
     {
-        private readonly IStockRepository _stockRepo;
-        public StockController(IStockRepository stockRepository)
+        private readonly IStockService _stockService;
+        public StockController(IStockService stockService)
         {
-            _stockRepo = stockRepository;
+            _stockService = stockService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var stocks = await _stockRepo.GetAllAsync(query);
-
-            var stockDtos = stocks.Select(s => s.ToStockDto());
+            var stockDtos = await _stockService.GetAllAsync(query);
 
             return Ok(stockDtos);
         }
@@ -29,12 +27,17 @@ namespace WebApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var stock = await _stockRepo.GetByIdAsync(id);
+            StockDto stock;
+            try
+            {
+                stock = await _stockService.GetByIdAsync(id);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
-            if (stock == null)
-                return NotFound();
-
-            return Ok(stock.ToStockDto());
+            return Ok(stock);
         }
 
         [HttpPost]
@@ -43,9 +46,7 @@ namespace WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stockModel = stockDto.ToStockFromCreateDto();
-
-            await _stockRepo.CreateAsync(stockModel);
+            var stockModel = await _stockService.CreateAsync(stockDto);
 
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
         }
@@ -56,10 +57,14 @@ namespace WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedCount = await _stockRepo.UpdateAsync(id, updateDto);
-
-            if (updatedCount == 0)
-                return NotFound();
+            try
+            {
+                await _stockService.UpdateAsync(id, updateDto);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
             var stockModel = updateDto.ToStockFromUpdateDto();
 
@@ -69,11 +74,14 @@ namespace WebApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-
-            var deletedCount = await _stockRepo.DeleteAsync(id);
-
-            if (deletedCount == 0)
-                return NotFound();
+            try
+            {
+                await _stockService.DeleteAsync(id);
+            }
+            catch (Exception e)
+            {
+                return NotFound(e.Message);
+            }
 
             return NoContent();
         }
