@@ -3,6 +3,8 @@ using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infastructure.Data;
 using WebApi.Infastructure.Repositories;
+using WebApi.Infrastructure.Services;
+using WebApi.Infrastructure.Services.Interfaces;
 using WebApi.Web.Extensions;
 using WebApi.Web.Identity;
 
@@ -20,10 +22,10 @@ builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IStockService, StockService>();
-
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddJwtSwaggerGen();
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
