@@ -1,12 +1,16 @@
 using WebApi.Application.Repositories.Interfaces;
 using WebApi.Infastructure.Data;
 using WebApi.Infastructure.Repositories;
+using WebApi.Web.Extensions;
+using WebApi.Web.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddCustomIdentity();
+builder.Services.AddCustomAuthentication(builder.Configuration);
 
 
 // Add services to the container.
@@ -36,6 +40,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
