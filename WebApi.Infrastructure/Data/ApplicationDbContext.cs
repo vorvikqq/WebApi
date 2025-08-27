@@ -20,6 +20,10 @@ namespace WebApi.Infastructure.Data
             modelBuilder.ApplyConfiguration(new CommentConfiguration());
             modelBuilder.ApplyConfiguration(new StockConfiguration());
             modelBuilder.ApplyConfiguration(new IdentityRoleConfiguration());
+
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.Stocks)
+                .WithMany();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

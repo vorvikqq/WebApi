@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.DTOs.Account;
 using WebApi.Infrastructure.Identity;
 using WebApi.Infrastructure.Services.Interfaces;
@@ -11,40 +9,32 @@ namespace WebApi.Web.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ITokenService _tokenService;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IAccountService _accountService;
 
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
+        public AccountController(IAccountService accountService)
         {
-            _userManager = userManager;
-            _tokenService = tokenService;
-            _signInManager = signInManager;
+            _accountService = accountService;
         }
 
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginDto.Username.ToLower());
+            AppUser user;
 
-            if (user == null)
-                return Unauthorized("Invalid username");
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
-            if (!result.Succeeded)
-                return Unauthorized("User not found or password ");
-
-            var userResponse = new UserResponse
+            try
             {
-                Username = user.UserName!,
-                Email = user.Email!,
-                Token = _tokenService.CreateToken(user)
-            };
+                user = await _accountService.ValidateUserCredentialsAsync(loginDto.Username, loginDto.Password);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                return Unauthorized(e.Message);
+            }
+
+            var userResponse = _accountService.GetUserForResponse(user);
 
             return Ok(userResponse);
         }
@@ -52,45 +42,21 @@ namespace WebApi.Web.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var appUser = new AppUser
-                {
-                    UserName = registerDto.Username,
-                    Email = registerDto.Email,
-                };
-
-                var createdUser = await _userManager.CreateAsync(appUser, registerDto.Password);
-
-                if (createdUser.Succeeded)
-                {
-                    var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
-
-                    if (roleResult.Succeeded)
-                    {
-                        var userResponse = new UserResponse
-                        {
-                            Username = appUser.UserName,
-                            Email = appUser.Email,
-                            Token = _tokenService.CreateToken(appUser)
-                        };
-
-                        return Ok(userResponse);
-                    }
-                    else
-                    {
-                        return BadRequest(roleResult.Errors);
-                    }
-                }
-
-                return BadRequest(createdUser.Errors);
+                var userResponse = await _accountService.RegisterUserAsync(registerDto);
+                return Ok(userResponse);
+            }
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(e.Message);
             }
             catch (Exception e)
             {
-                return StatusCode(500, e);
+                return StatusCode(500, "An error occurred during registration");
             }
         }
     }
