@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApi.Application.Services.Interfaces;
-using WebApi.Infrastructure.Identity;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebApi.Infrastructure.Services.Interfaces;
 using WebApi.Web.Extensions;
 
 namespace WebApi.Web.Controllers
@@ -12,25 +8,21 @@ namespace WebApi.Web.Controllers
     [ApiController]
     public class PortfolioController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IStockService _stockService;
+        private readonly IPortfolioService _portfolioService;
 
-        public PortfolioController(UserManager<AppUser> userManager, IStockService stockService)
+        public PortfolioController(IPortfolioService portfolioService)
         {
-            _userManager = userManager;
-            _stockService = stockService;
+            _portfolioService = portfolioService;
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var username = User.GetUsername();
-            var appUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == username);
 
+            var userStocks = await _portfolioService.GetUserPortfolioAsync(username);
 
-
-            return Ok();
+            return Ok(userStocks);
         }
     }
 }
