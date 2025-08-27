@@ -9,6 +9,7 @@ namespace WebApi.Infrastructure.Repositories
     public interface IPortfolioRepository
     {
         Task<List<Stock>> GetUserPortfolioByUsername(string username);
+        Task AddStockToPortfolio(string username, Stock stock);
     }
 
 
@@ -21,6 +22,16 @@ namespace WebApi.Infrastructure.Repositories
         {
             _context = context;
             _userManager = userManager;
+        }
+
+        public async Task AddStockToPortfolio(string username, Stock stock)
+        {
+            var userWithStocks = await _userManager.Users
+                .Include(u => u.Stocks)
+                .FirstOrDefaultAsync(u => u.UserName == username);
+
+            userWithStocks?.Stocks.Add(stock);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Stock>> GetUserPortfolioByUsername(string username)

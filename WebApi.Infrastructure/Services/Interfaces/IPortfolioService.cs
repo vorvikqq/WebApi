@@ -5,5 +5,6 @@ namespace WebApi.Infrastructure.Services.Interfaces
     public interface IPortfolioService
     {
         Task<List<Stock>> GetUserPortfolioAsync(string username);
+        Task AddPortfolio(string username, string stockSymbol);
     }
 }
