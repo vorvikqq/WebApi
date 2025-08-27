@@ -45,5 +45,20 @@ namespace WebApi.Infrastructure.Services
 
             await _portfolioRepository.AddStockToPortfolio(username, stock);
         }
+
+        public async Task DeletePortfolio(string username, string stockSymbol)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentException("Username cannot be null or empty", nameof(username));
+
+            var userPortfolio = await GetUserPortfolioAsync(username);
+
+            var stockToRemove = userPortfolio.FirstOrDefault(s => s.Symbol.ToLower() == stockSymbol.ToLower());
+
+            if (stockToRemove == null)
+                throw new KeyNotFoundException("Stock not found");
+
+            await _portfolioRepository.DeleteStockFromPortfolio(username, stockToRemove);
+        }
     }
 }

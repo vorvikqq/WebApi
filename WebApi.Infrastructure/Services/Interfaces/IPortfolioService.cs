@@ -6,5 +6,6 @@ namespace WebApi.Infrastructure.Services.Interfaces
     {
         Task<List<Stock>> GetUserPortfolioAsync(string username);
         Task AddPortfolio(string username, string stockSymbol);
+        Task DeletePortfolio(string username, string stockSymbol);
     }
 }

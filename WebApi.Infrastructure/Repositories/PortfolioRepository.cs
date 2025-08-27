@@ -10,6 +10,7 @@ namespace WebApi.Infrastructure.Repositories
     {
         Task<List<Stock>> GetUserPortfolioByUsername(string username);
         Task AddStockToPortfolio(string username, Stock stock);
+        Task DeleteStockFromPortfolio(string username, Stock stock);
     }
 
 
@@ -31,6 +32,16 @@ namespace WebApi.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.UserName == username);
 
             userWithStocks?.Stocks.Add(stock);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteStockFromPortfolio(string username, Stock stock)
+        {
+            var userWithStocks = await _userManager.Users
+                           .Include(u => u.Stocks)
+                           .FirstOrDefaultAsync(u => u.UserName == username);
+
+            userWithStocks?.Stocks.Remove(stock);
             await _context.SaveChangesAsync();
         }
 

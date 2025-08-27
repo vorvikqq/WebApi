@@ -45,5 +45,24 @@ namespace WebApi.Web.Controllers
 
             return Ok("added");
         }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeletePortfolio(string symbol)
+        {
+            var username = User.GetUsername();
+
+            try
+            {
+                await _portfolioService.DeletePortfolio(username, symbol);
+            }
+            catch (Exception e)
+            {
+                //Краще кожну окремо обробити помилку. Ну це на майбутнє
+                return BadRequest(e.Message);
+            }
+
+            return Ok("deleted");
+        }
     }
 }
