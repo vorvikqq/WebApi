@@ -23,8 +23,7 @@ namespace WebApi.Web.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginDto)
         {
-
-
+            //add validation username and password is null or empty
             AppUser user;
 
             try
