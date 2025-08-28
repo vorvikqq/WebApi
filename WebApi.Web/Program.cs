@@ -8,6 +8,7 @@ using WebApi.Infrastructure.Repositories;
 using WebApi.Infrastructure.Services;
 using WebApi.Infrastructure.Services.Interfaces;
 using WebApi.Web.Extensions;
+using WebApi.Web.Handlers;
 using WebApi.Web.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,9 @@ builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddJwtSwaggerGen();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
@@ -55,6 +59,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
