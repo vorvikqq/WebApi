@@ -27,15 +27,11 @@ namespace WebApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            StockDto stock;
-            try
-            {
-                stock = await _stockService.GetByIdAsync(id);
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+
+            var stock = await _stockService.GetByIdAsync(id);
+
+            if (stock == null)
+                return NotFound();
 
             return Ok(stock);
         }
@@ -57,14 +53,11 @@ namespace WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                await _stockService.UpdateAsync(id, updateDto);
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+
+            var isUpdated = await _stockService.UpdateAsync(id, updateDto);
+
+            if (!isUpdated)
+                return NotFound("stock not found");
 
             var stockModel = updateDto.ToStockFromUpdateDto();
 
@@ -74,14 +67,10 @@ namespace WebApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            try
-            {
-                await _stockService.DeleteAsync(id);
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+            var isDeleted = await _stockService.DeleteAsync(id);
+
+            if (!isDeleted)
+                return NotFound("stock not found");
 
             return NoContent();
         }

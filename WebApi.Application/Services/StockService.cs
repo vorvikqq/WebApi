@@ -25,12 +25,12 @@ namespace WebApi.Application.Services
             return stockDtos;
         }
 
-        public async Task<StockDto> GetByIdAsync(int id)
+        public async Task<StockDto?> GetByIdAsync(int id)
         {
             var stock = await _stockRepo.GetByIdAsync(id);
 
             if (stock == null)
-                throw new KeyNotFoundException("stock doesn't found");
+                return null;
 
             return stock.ToStockDto();
         }
@@ -44,20 +44,18 @@ namespace WebApi.Application.Services
             return stockModel;
         }
 
-        public async Task UpdateAsync(int id, UpdateStockRequestDto stockDto)
+        public async Task<bool> UpdateAsync(int id, UpdateStockRequestDto stockDto)
         {
             var updatedCount = await _stockRepo.UpdateAsync(id, stockDto);
 
-            if (updatedCount == 0)
-                throw new KeyNotFoundException("stock doesn't found");
+            return updatedCount > 0;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var deletedCount = await _stockRepo.DeleteAsync(id);
 
-            if (deletedCount == 0)
-                throw new KeyNotFoundException("stock doesn't found");
+            return deletedCount > 0;
         }
 
         public async Task<bool> IsExistAsnyc(int id)
