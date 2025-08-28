@@ -6,7 +6,7 @@ using WebApi.Infrastructure.Services.Interfaces;
 
 namespace WebApi.Web.Controllers
 {
-    [Route("api/account")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -23,8 +23,7 @@ namespace WebApi.Web.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+
 
             AppUser user;
 
@@ -57,7 +56,7 @@ namespace WebApi.Web.Controllers
             {
                 return BadRequest(e.Message);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred during registration");
             }
