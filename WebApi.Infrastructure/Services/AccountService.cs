@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApi.Application.DTOs.Account;
 using WebApi.Infrastructure.Identity;
+using WebApi.Infrastructure.Mapper;
 using WebApi.Infrastructure.Services.Interfaces;
 
 namespace WebApi.Infrastructure.Services
@@ -38,15 +39,6 @@ namespace WebApi.Infrastructure.Services
             return user;
         }
 
-        public UserResponse GetUserForResponse(AppUser user)
-        {
-            return new UserResponse
-            {
-                Username = user.UserName!,
-                Email = user.Email!,
-                Token = _tokenService.CreateToken(user)
-            };
-        }
 
         public async Task<UserResponse> RegisterUserAsync(RegisterRequest registerDto)
         {
@@ -75,7 +67,7 @@ namespace WebApi.Infrastructure.Services
             if (!roleResult.Succeeded)
                 throw new InvalidOperationException("Role assignment failed.");
 
-            return GetUserForResponse(appUser);
+            return appUser.ToUserResponse(_tokenService.CreateToken(appUser));
         }
     }
 }

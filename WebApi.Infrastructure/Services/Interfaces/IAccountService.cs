@@ -7,7 +7,6 @@ namespace WebApi.Infrastructure.Services.Interfaces
     {
         Task<AppUser> GetUserByUsernameAsync(string username);
         Task<AppUser> ValidateUserCredentialsAsync(string username, string password);
-        UserResponse GetUserForResponse(AppUser user);
         Task<UserResponse> RegisterUserAsync(RegisterRequest registerDto);
     }
 }

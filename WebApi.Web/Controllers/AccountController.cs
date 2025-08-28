@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApi.Application.DTOs.Account;
 using WebApi.Infrastructure.Identity;
+using WebApi.Infrastructure.Mapper;
 using WebApi.Infrastructure.Services.Interfaces;
 
 namespace WebApi.Web.Controllers
@@ -10,10 +11,12 @@ namespace WebApi.Web.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly ITokenService _tokenService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ITokenService tokenService)
         {
             _accountService = accountService;
+            _tokenService = tokenService;
         }
 
 
@@ -34,7 +37,7 @@ namespace WebApi.Web.Controllers
                 return Unauthorized(e.Message);
             }
 
-            var userResponse = _accountService.GetUserForResponse(user);
+            var userResponse = user.ToUserResponse(_tokenService.CreateToken(user));
 
             return Ok(userResponse);
         }

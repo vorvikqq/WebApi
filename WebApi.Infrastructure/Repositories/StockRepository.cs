@@ -14,6 +14,9 @@ namespace WebApi.Infastructure.Repositories
         {
             _context = context;
         }
+
+        // Create separate methods for each filter
+        // parameter and check which to use in service, not in repository
         public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
             var stocks = _context.Stocks.Include(s => s.Comments).AsNoTracking();
