@@ -27,15 +27,10 @@ namespace WebApi.Web.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            CommentResponseDto comment;
-            try
-            {
-                comment = await _commentService.GetCommentByIdAsync(id);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
+            var comment = await _commentService.GetCommentByIdAsync(id);
+
+            if (comment == null)
+                return NotFound();
 
             return Ok(comment);
         }
@@ -48,6 +43,9 @@ namespace WebApi.Web.Controllers
 
             var commentModel = await _commentService.CreateCommentAsync(stockId, commentDto);
 
+            if (commentModel == null)
+                return NotFound("stock not found");
+
             return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentResponse());
         }
 
@@ -57,14 +55,11 @@ namespace WebApi.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                await _commentService.UpdateCommentAsync(id, commentDto);
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+
+            var isUpdated = await _commentService.UpdateCommentAsync(id, commentDto);
+
+            if (!isUpdated)
+                return NotFound("Comment not found");
 
             return Ok(commentDto);
         }
@@ -72,14 +67,10 @@ namespace WebApi.Web.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            try
-            {
-                await _commentService.DeleteCommentAsync(id);
-            }
-            catch (Exception e)
-            {
-                return NotFound(e.Message);
-            }
+            var isDeleted = await _commentService.DeleteCommentAsync(id);
+
+            if (!isDeleted)
+                return NotFound("Comment not found");
 
             return NoContent();
         }

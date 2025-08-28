@@ -16,10 +16,10 @@ namespace WebApi.Application.Services
             _commentRepository = commentRepo;
             _stockRepository = stockRepo;
         }
-        public async Task<Comment> CreateCommentAsync(int stockId, CommentCreateRequest commentDto)
+        public async Task<Comment?> CreateCommentAsync(int stockId, CommentCreateRequest commentDto)
         {
             if (!await _stockRepository.IsExistAsnyc(stockId))
-                throw new KeyNotFoundException("stock does not exist");
+                return null;
 
             var commentModel = commentDto.ToCommentFromCreateRequest(stockId);
             await _commentRepository.CreateAsync(commentModel);
@@ -27,12 +27,11 @@ namespace WebApi.Application.Services
             return commentModel;
         }
 
-        public async Task DeleteCommentAsync(int id)
+        public async Task<bool> DeleteCommentAsync(int id)
         {
             var deletedCount = await _commentRepository.DeleteAsync(id);
 
-            if (deletedCount == 0)
-                throw new KeyNotFoundException("Comment doesn't exist");
+            return deletedCount > 0;
         }
 
         public async Task<IEnumerable<CommentResponseDto>> GetAllCommentsAsync()
@@ -43,22 +42,21 @@ namespace WebApi.Application.Services
             return commentResponse;
         }
 
-        public async Task<CommentResponseDto> GetCommentByIdAsync(int id)
+        public async Task<CommentResponseDto?> GetCommentByIdAsync(int id)
         {
             var comment = await _commentRepository.GetByIdAsync(id);
 
             if (comment == null)
-                throw new KeyNotFoundException("Comment does not found");
+                return null;
 
             return comment.ToCommentResponse();
         }
 
-        public async Task UpdateCommentAsync(int id, CommentUpdateRequest dto)
+        public async Task<bool> UpdateCommentAsync(int id, CommentUpdateRequest dto)
         {
             var updatedCount = await _commentRepository.UpdateAsync(id, dto);
 
-            if (updatedCount == 0)
-                throw new KeyNotFoundException("Comment doesn't exist");
+            return updatedCount > 0;
         }
     }
 }
