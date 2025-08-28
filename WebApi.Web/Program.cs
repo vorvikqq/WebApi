@@ -1,7 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using WebApi.Application.Repositories.Interfaces;
 using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
-using WebApi.Application.Settings;
 using WebApi.Infastructure.Data;
 using WebApi.Infastructure.Repositories;
 using WebApi.Infrastructure.Repositories;
@@ -13,15 +13,14 @@ using WebApi.Web.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// IOptions
-builder.Services.Configure<DatabaseSettings>(
-            builder.Configuration.GetSection("DatabaseSettings"));
 
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("JwtSettings"));
 
 // add DbContext
-builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 builder.Services.AddCustomIdentity();
 builder.Services.AddCustomAuthentication(builder.Configuration);
 
